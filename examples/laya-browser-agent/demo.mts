@@ -12,9 +12,7 @@ const settingsButton = document.querySelector<HTMLButtonElement>('#settings-butt
 const settingsPanel = document.querySelector<HTMLDivElement>('#settings-panel')!
 
 searchButton.addEventListener('click', () => {
-	searchResult.textContent = searchBox.value
-		? `搜索结果：${searchBox.value}`
-		: '请输入搜索内容'
+	searchResult.textContent = searchBox.value ? `搜索结果：${searchBox.value}` : '请输入搜索内容'
 })
 
 docsButton.addEventListener('click', () => {
@@ -27,8 +25,7 @@ settingsButton.addEventListener('click', () => {
 
 const agent = new LayaBrowserAgent({
 	endpoint: 'http://127.0.0.1:8765',
-	confidenceThreshold: 0.72,
-	completionThreshold: 0.88,
+	confidenceThreshold: 0.4,
 	maxCandidates: 16,
 })
 
