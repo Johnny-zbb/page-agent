@@ -59,7 +59,7 @@ interface LayaResponse {
 }
 
 const DEFAULT_ENDPOINT = 'http://127.0.0.1:8765'
-const DEFAULT_CONFIDENCE_THRESHOLD = 0.4
+const DEFAULT_CONFIDENCE_THRESHOLD = 0.3
 /** noul used only on pages with no executable elements at all. */
 const NO_CANDIDATE_COMPLETION_THRESHOLD = 0.88
 

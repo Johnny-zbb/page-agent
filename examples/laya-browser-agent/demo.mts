@@ -25,7 +25,7 @@ settingsButton.addEventListener('click', () => {
 
 const agent = new LayaBrowserAgent({
 	endpoint: 'http://127.0.0.1:8765',
-	confidenceThreshold: 0.4,
+	confidenceThreshold: 0.3,
 	maxCandidates: 16,
 })
 
