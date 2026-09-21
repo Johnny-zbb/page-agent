@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Laya BrowserAgent MVP</title>
+		<style>
+			body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+			.control, .target { border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin: 16px 0; }
+			.row { display: flex; gap: 8px; margin: 8px 0; }
+			input { flex: 1; padding: 10px 12px; }
+			button { padding: 10px 14px; cursor: pointer; }
+			pre { background: #f6f6f6; padding: 12px; overflow: auto; min-height: 80px; }
+			.hidden { display: none; }
+		</style>
+	</head>
+	<body>
+		<h1>Laya BrowserAgent MVP</h1>
+		<p>下面上半区是 Agent 控制台，下半区是它要操作的页面。</p>
+
+		<section class="control">
+			<h2>Agent</h2>
+			<div class="row">
+				<input
+					id="task"
+					data-page-agent-not-interactive
+					value="搜索 MacBook Pro"
+					placeholder="输入任务，例如：搜索 MacBook Pro"
+				/>
+				<button id="run" data-page-agent-not-interactive>运行</button>
+			</div>
+			<pre id="agent-output" data-page-agent-not-interactive>Ready.</pre>
+		</section>
+
+		<section class="target">
+			<h2>Target page</h2>
+			<div class="row">
+				<input id="search-box" placeholder="搜索商品" />
+				<button id="search-button">搜索</button>
+			</div>
+			<div class="row">
+				<button id="docs-button">打开文档</button>
+				<button id="settings-button">设置</button>
+			</div>
+			<p id="search-result">尚未搜索</p>
+			<div id="docs-panel" class="hidden">
+				<h3>PageAgent 文档</h3>
+				<p>Documentation opened successfully.</p>
+			</div>
+			<div id="settings-panel" class="hidden">
+				<h3>设置</h3>
+				<p>Settings opened successfully.</p>
+			</div>
+		</section>
+
+		<script type="module" src="/demo.mts"></script>
+	</body>
+</html>
