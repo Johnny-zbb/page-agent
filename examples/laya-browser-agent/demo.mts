@@ -1,4 +1,4 @@
-import { LayaBrowserAgent } from "./LayaBrowserAgent"
+import { LayaBrowserAgent } from "./LayaBrowserAgent.mts"
 
 const agent = new LayaBrowserAgent({
   endpoint: "http://127.0.0.1:8765",

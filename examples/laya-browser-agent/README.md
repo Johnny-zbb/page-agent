@@ -44,7 +44,7 @@ Health check: `http://127.0.0.1:8765/health`.
 
 ## 2. Run the BrowserAgent
 
-Use `LayaBrowserAgent.ts` from a PageAgent dev page or import it into a small demo entry:
+Use `LayaBrowserAgent.mts` from a PageAgent dev page or import it into a small demo entry:
 
 ```ts
 import { LayaBrowserAgent } from "./LayaBrowserAgent"
