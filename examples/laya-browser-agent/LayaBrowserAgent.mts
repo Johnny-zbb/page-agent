@@ -98,8 +98,11 @@ export class LayaBrowserAgent {
   async execute(task: string): Promise<LayaBrowserAgentResult> {
     if (!task.trim()) throw new Error("Task is required")
 
+    // Cancel any previous run. Each run captures its own controller so a stale
+    // run observes the abort of its own run, never the signal of a newer one.
     this.abortController.abort()
-    this.abortController = new AbortController()
+    const abortController = new AbortController()
+    this.abortController = abortController
     const startedAt = performance.now()
     const steps: LayaBrowserStep[] = []
     let layaCalls = 0
@@ -108,24 +111,20 @@ export class LayaBrowserAgent {
 
     try {
       for (let step = 0; step < this.maxSteps; step++) {
-        if (this.abortController.signal.aborted) {
+        if (abortController.signal.aborted) {
           return this.finish(false, "Task stopped", steps, layaCalls, startedAt)
         }
 
         const browserState = await this.pageController.getBrowserState()
-        const candidates = generateCandidates(task, browserState, this.maxCandidates)
-        if (candidates.length === 0) {
-          return this.finish(
-            false,
-            "No executable Laya candidates. This MVP needs generated parameters or a richer action space.",
-            steps,
-            layaCalls,
-            startedAt
-          )
+
+        if (abortController.signal.aborted) {
+          return this.finish(false, "Task stopped", steps, layaCalls, startedAt)
         }
 
+        const candidates = generateCandidates(task, browserState, this.maxCandidates)
+
         const decisionStartedAt = performance.now()
-        const response = await this.decide(task, browserState, candidates, steps)
+        const response = await this.decide(task, browserState, candidates, steps, abortController.signal)
         layaCalls++
         const decisionLatencyMs = performance.now() - decisionStartedAt
 
@@ -134,6 +133,16 @@ export class LayaBrowserAgent {
           return this.finish(
             true,
             "Laya judged the browser task complete.",
+            steps,
+            layaCalls,
+            startedAt
+          )
+        }
+
+        if (candidates.length === 0) {
+          return this.finish(
+            false,
+            "No executable elements on the page and Laya judged the task not complete.",
             steps,
             layaCalls,
             startedAt
@@ -164,6 +173,10 @@ export class LayaBrowserAgent {
           )
         }
 
+        if (abortController.signal.aborted) {
+          return this.finish(false, "Task stopped", steps, layaCalls, startedAt)
+        }
+
         const output = await this.executeAction(candidate.action)
         steps.push({
           step,
@@ -186,8 +199,11 @@ export class LayaBrowserAgent {
       }
       return this.finish(false, String(error), steps, layaCalls, startedAt)
     } finally {
-      await this.pageController.hideMask()
-      await this.pageController.cleanUpHighlights()
+      // A stale run must not tear down UI that a newer run just set up.
+      if (this.abortController === abortController) {
+        await this.pageController.hideMask()
+        await this.pageController.cleanUpHighlights()
+      }
     }
   }
 
@@ -211,7 +227,8 @@ export class LayaBrowserAgent {
     task: string,
     browserState: BrowserState,
     candidates: Candidate[],
-    steps: LayaBrowserStep[]
+    steps: LayaBrowserStep[],
+    signal: AbortSignal
   ): Promise<LayaResponse> {
     const criteria = Object.fromEntries(candidates.map((item) => [item.id, item.description]))
     const state = {
@@ -222,23 +239,28 @@ export class LayaBrowserAgent {
       candidates: criteria,
       recent_actions: steps.slice(-4),
     }
-    const questions = {
+    const questions: Record<string, unknown> = {
       task_complete: {
         type: "noul",
-        instructions: "Is the user browser task already complete according to the current page and recent actions?",
+        instructions:
+          "Is the user browser task already complete according to the current page and recent actions?",
       },
-      next_action: {
+    }
+    // Without candidates there is nothing to choose, so only ask for completion.
+    if (candidates.length > 0) {
+      questions.next_action = {
         type: "choice",
-        instructions: "Which candidate is the single best safe browser action to make progress on the user task now?",
+        instructions:
+          "Which candidate is the single best safe browser action to make progress on the user task now?",
         criteria,
-      },
+      }
     }
 
     const response = await this.fetchFn(this.endpoint + "/predict", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ state, questions, model: this.model, lang: this.language }),
-      signal: this.abortController.signal,
+      signal,
     })
 
     if (!response.ok) {
