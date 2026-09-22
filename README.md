@@ -117,3 +117,11 @@ file and in the node_modules directory after installation.
    <img alt="Star History Chart" src="https://api.star-history.com/image?repos=alibaba/page-agent&type=date&legend=top-left&v=7" />
  </picture>
 </a>
+
+
+## Experimental: Laya BrowserAgent
+
+This fork contains a Laya-powered non-autoregressive BrowserAgent MVP that reuses the PageAgent
+PageController DOM snapshot and indexed action layer.
+
+See [examples/laya-browser-agent](examples/laya-browser-agent/README.md).

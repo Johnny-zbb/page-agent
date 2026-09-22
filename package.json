@@ -35,7 +35,8 @@
         "version": "node scripts/sync-version.js",
         "lint": "eslint .",
         "cleanup": "rm -rf packages/*/dist",
-        "prepare": "husky"
+        "prepare": "husky",
+        "dev:laya": "vite --config examples/laya-browser-agent/vite.config.js"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",
